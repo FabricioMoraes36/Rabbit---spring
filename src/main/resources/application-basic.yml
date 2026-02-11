@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: demo
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    function:
+      definition: orderConsumer;orderConsumerB
+    stream:
+      bindings:
+        order-out-0:
+          destination: orders.created
+          content-type: application/json
+        final-dlq-order-out-0:
+          destination: final.dlq.orders.created
+          content-type: application/json
+          producer:
+            required-groups: final-dlq-a
+        orderConsumer-in-0:
+          destination: orders.created
+          group: demo-group
+          consumer:
+            max-attempts: 1
+            bind-queue: false
+            declare-exchange: false
+            queue-name-group-only: true
+        orderConsumerB-in-0:
+          destination: orders.created
+          group: demo-group-b
+          consumer:
+            max-attempts: 1
+            bind-queue: false
+            declare-exchange: false
+            queue-name-group-only: true
+      rabbit:
+        bindings:
+          orderConsumer-in-0:
+            consumer:
+              auto-bind-dlq: true
+              dlq-ttl: 10000
+              dlq-dead-letter-exchange:
+          orderConsumerB-in-0:
+            consumer:
+              auto-bind-dlq: true
+              dlq-ttl: 10000
+              dlq-dead-letter-exchange:
+
+server:
+  port: 8087

@@ -8,45 +8,58 @@ spring:
     password: guest
   cloud:
     function:
-      definition: orderConsumer;orderConsumerB
+      definition: inventoryOrderConsumer;invoiceOrderConsumer
     stream:
       bindings:
-        order-out-0:
-          destination: orders.created
-          content-type: application/json
-        final-dlq-order-out-0:
-          destination: final.dlq.orders.created
-          content-type: application/json
-          producer:
-            required-groups: final-dlq-a
-        orderConsumer-in-0:
-          destination: orders.created
-          group: demo-group
-          consumer:
-            max-attempts: 1
-            bind-queue: false
-            declare-exchange: false
-            queue-name-group-only: true
-        orderConsumerB-in-0:
-          destination: orders.created
-          group: demo-group-b
-          consumer:
-            max-attempts: 1
-            bind-queue: false
-            declare-exchange: false
-            queue-name-group-only: true
+        #        order-out-0:
+        #          destination: orders.created
+        #          content-type: application/json
+        #        final-dlq-order-out-0:
+        #          destination: final.dlq.orders.created
+        #          content-type: application/json
+        #          producer:
+        #            required-groups: inventory-order-consumer # Necessary to create the
+
+
+        # Binding
+        userCreated-out-0:
+          destination: users.events
+        userDeleted-out-0:
+          destination: users.events
+
+
+
+
+      #        inventoryOrderConsumer-in-0:
+      #          destination: orders.created
+      #          group: inventory-order-consumer
+      #          consumer:
+      #            # IMPORTANT: we want broker-based retry, not in-container retry
+      #            max-attempts: 1
+      #            bind-queue: false
+      #            declare-exchange: false
+      #            queue-name-group-only: true
+      #        invoiceOrderConsumer-in-0:
+      #          destination: orders.created
+      #          group: invoice-order-consumer
+      #          consumer:
+      #            # IMPORTANT: we want broker-based retry, not in-container retry
+      #            max-attempts: 1
+      #            bind-queue: false
+      #            declare-exchange: false
+      #            queue-name-group-only: true
       rabbit:
         bindings:
-          orderConsumer-in-0:
-            consumer:
-              auto-bind-dlq: true
-              dlq-ttl: 10000
-              dlq-dead-letter-exchange:
-          orderConsumerB-in-0:
-            consumer:
-              auto-bind-dlq: true
-              dlq-ttl: 10000
-              dlq-dead-letter-exchange:
-
-server:
-  port: 8087
+          #          inventoryOrderConsumer-in-0:
+          #            consumer:
+          #              auto-bind-dlq: true
+          #              dlq-ttl: 10000
+          #              dlq-dead-letter-exchange:
+          #          invoiceOrderConsumer-in-0:
+          #            consumer:
+          #              auto-bind-dlq: true
+          #              dlq-ttl: 10000
+          #              dlq-dead-letter-exchange:
+          userCreated-out-0:
+            producer:
+              routingKeyExpression: "'user.events.created'"

@@ -1,0 +1,6 @@
+Exchange: users.events
+Queue: users.created.queue
+Routing key: user.events.created
+
+// teste postman
+http://localhost:8080/users/123
